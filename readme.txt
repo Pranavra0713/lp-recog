@@ -5,3 +5,5 @@ the following must be installed
 - pip install opencv-python   
 - pip install imutils   
 - pytesertact
+- pip install tk
+- 
