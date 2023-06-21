@@ -1,5 +1,6 @@
 import cv2, os, csv, imutils, pytesseract, tkinter as tk
 from PIL import ImageTk, Image
+
 output_csv_file = open('output.csv', 'w')
 csv_writer = csv.writer(output_csv_file)
 csv_writer.writerow(['Filename', 'License Plate'])
@@ -44,7 +45,13 @@ def display_results():
     photo_images = []  # List to store references to PhotoImage objects so that garbage collection of images will be avoided
     actual_images = []
     text_widget.tag_configure('center', justify='center')
-    with open('output.csv', 'r') as csv_file:
+    with open('output.csv', 'r') as file:
+        csv_reader = csv.reader(file)
+        rows = [row for row in csv_reader if any(field.strip() for field in row)]
+    with open('output1.csv', 'w', newline='') as file:
+        csv_writer = csv.writer(file)
+        csv_writer.writerows(rows)
+    with open('output1.csv', 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
         next(csv_reader)  # Skip the first line (header row)
         for row in csv_reader:
@@ -53,6 +60,7 @@ def display_results():
             plate_image.thumbnail((400, 400))  # Resize the image
             plate_image = ImageTk.PhotoImage(plate_image)
             photo_images.append(plate_image)  # Store reference to PhotoImage object
+
             actual_image_filename = f"{row[0]}"
             actual_image = Image.open(f"input/{actual_image_filename}")
             actual_image.thumbnail((400, 400))  # Resize the image
@@ -60,15 +68,19 @@ def display_results():
             actual_images.append(actual_image)
             text_widget.image_create(tk.END, image=actual_image)
             text_widget.insert(tk.END, "\n",'center')
+
             text_widget.insert(tk.END, f"Filename: {row[0]}\n",'center')
+
             text_widget.insert(tk.END, f"License Plate: {row[1]}\n",'center')
+
             text_widget.image_create(tk.END, image=plate_image)
             text_widget.insert(tk.END, "\n",'center')
+
             separator_line = "-" * w
             text_widget.insert(tk.END, f"{separator_line}\n\n")
-    text_widget.photo_images = photo_images  # Keep a reference to the PhotoImage objects to prevent them from being garbage collected
+    # Keep a reference to the PhotoImage objects to prevent them from being garbage collected
+    text_widget.photo_images = photo_images
     text_widget.actual_images = actual_images
-    
 window = tk.Tk()
 window.title("License Plate Recognition")
 button = tk.Button(window, text="Start Recognition", command=process_images)
